@@ -1,0 +1,527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Workout Buddy</title>
+<style>
+  :root {
+    --bg: #121212;
+    --surface: #1e1e1e;
+    --card: #2a2a2a;
+    --text: #e0e0e0;
+    --text-dim: #999;
+    --accent: #bb86fc;
+    --accent-dark: #7c4dff;
+    --push: #ff7043;
+    --pull: #42a5f5;
+    --check-green: #66bb6a;
+    --radius: 12px;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  .container {
+    max-width: 600px;
+    margin: 0 auto;
+    padding: 16px;
+  }
+
+  h1 {
+    text-align: center;
+    font-size: 1.6rem;
+    margin-bottom: 8px;
+    color: var(--accent);
+  }
+
+  .subtitle {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.9rem;
+    margin-bottom: 24px;
+  }
+
+  /* ── Selector Screen ── */
+  #selector { display: block; }
+  #workout { display: none; }
+
+  .option-group {
+    margin-bottom: 20px;
+  }
+
+  .option-group label {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 8px;
+  }
+
+  .btn-row {
+    display: flex;
+    gap: 10px;
+  }
+
+  .btn-row button {
+    flex: 1;
+    padding: 14px 8px;
+    border: 2px solid var(--card);
+    border-radius: var(--radius);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .btn-row button.selected {
+    border-color: var(--accent);
+    background: var(--card);
+  }
+
+  .btn-row button:active { transform: scale(0.97); }
+
+  .start-btn {
+    display: block;
+    width: 100%;
+    padding: 16px;
+    margin-top: 28px;
+    border: none;
+    border-radius: var(--radius);
+    background: var(--accent-dark);
+    color: #fff;
+    font-size: 1.15rem;
+    font-weight: 700;
+    cursor: pointer;
+    opacity: 0.4;
+    pointer-events: none;
+    transition: opacity 0.2s;
+  }
+
+  .start-btn.ready {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .start-btn.ready:active { transform: scale(0.97); }
+
+  /* ── Workout Screen ── */
+  .top-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 16px;
+  }
+
+  .back-btn {
+    background: none;
+    border: none;
+    color: var(--accent);
+    font-size: 1.5rem;
+    cursor: pointer;
+    padding: 4px 8px;
+    line-height: 1;
+  }
+
+  .workout-title {
+    font-size: 1.2rem;
+    font-weight: 700;
+  }
+
+  .workout-subtitle {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+  }
+
+  /* ── Exercise Cards ── */
+  .exercise-card {
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px;
+    margin-bottom: 16px;
+  }
+
+  .exercise-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .exercise-name {
+    font-size: 1.1rem;
+    font-weight: 700;
+  }
+
+  .badge {
+    font-size: 0.7rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    border-radius: 6px;
+    letter-spacing: 0.03em;
+  }
+
+  .badge-push { background: var(--push); color: #fff; }
+  .badge-pull { background: var(--pull); color: #fff; }
+
+  .video-wrap {
+    position: relative;
+    width: 100%;
+    padding-bottom: 56.25%;
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 12px;
+    background: #000;
+  }
+
+  .video-wrap iframe {
+    position: absolute;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    border: 0;
+  }
+
+  .weight-tip {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    margin-bottom: 12px;
+    line-height: 1.4;
+  }
+
+  .weight-tip strong { color: var(--text); }
+
+  .sets-row {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+
+  .set-check {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .set-check span {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+  }
+
+  .set-check input[type="checkbox"] {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 44px;
+    height: 44px;
+    border: 2px solid var(--text-dim);
+    border-radius: 10px;
+    background: var(--surface);
+    cursor: pointer;
+    position: relative;
+    transition: border-color 0.15s, background 0.15s;
+  }
+
+  .set-check input[type="checkbox"]:checked {
+    border-color: var(--check-green);
+    background: var(--check-green);
+  }
+
+  .set-check input[type="checkbox"]:checked::after {
+    content: '✓';
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+  }
+
+  /* Sally special card */
+  .sally-instructions {
+    font-size: 0.85rem;
+    color: var(--text-dim);
+    line-height: 1.5;
+    margin-bottom: 12px;
+  }
+
+  .sally-instructions strong { color: var(--text); }
+
+  /* Progress counter */
+  .progress-bar {
+    text-align: center;
+    color: var(--text-dim);
+    font-size: 0.85rem;
+    margin-bottom: 16px;
+    padding: 10px;
+    background: var(--surface);
+    border-radius: var(--radius);
+  }
+
+  .progress-bar .done { color: var(--check-green); font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- ════ Selector Screen ════ -->
+  <div id="selector">
+    <h1>Workout Buddy</h1>
+    <p class="subtitle">Pick your config and body focus, then hit Start.</p>
+
+    <div class="option-group">
+      <label>Config</label>
+      <div class="btn-row" id="config-btns">
+        <button data-value="5x5" onclick="pick('config', this)">5 × 5</button>
+        <button data-value="3x8" onclick="pick('config', this)">3 × 8</button>
+      </div>
+    </div>
+
+    <div class="option-group">
+      <label>Focus</label>
+      <div class="btn-row" id="type-btns">
+        <button data-value="upper" onclick="pick('type', this)">Upper</button>
+        <button data-value="lower" onclick="pick('type', this)">Lower</button>
+        <button data-value="mixed" onclick="pick('type', this)">Mixed</button>
+      </div>
+    </div>
+
+    <button class="start-btn" id="start-btn" onclick="startWorkout()">Start Workout</button>
+  </div>
+
+  <!-- ════ Workout Screen ════ -->
+  <div id="workout">
+    <div class="top-bar">
+      <button class="back-btn" onclick="goBack()" aria-label="Back">←</button>
+      <div>
+        <div class="workout-title" id="workout-title"></div>
+        <div class="workout-subtitle" id="workout-subtitle"></div>
+      </div>
+    </div>
+    <div class="progress-bar" id="progress"></div>
+    <div id="exercise-list"></div>
+  </div>
+
+</div>
+
+<script>
+/* ── Exercise Data ── */
+const EXERCISES = {
+  "Bench Press": {
+    video: "rT7DgCr-3pg",
+    weight: "45 lb (empty barbell)",
+    rationale: "Learn the movement pattern with just the bar.",
+    type: "push"
+  },
+  "Shoulder Press": {
+    video: "qEwKCR5JCog",
+    weight: "10 lb dumbbells",
+    rationale: "Light weight protects the rotator cuff while you learn.",
+    type: "push"
+  },
+  "Chest Flies": {
+    video: "eozdVDA78K0",
+    weight: "10 lb dumbbells",
+    rationale: "Isolation move — light weight prevents shoulder strain.",
+    type: "push"
+  },
+  "Dumbbell Rows": {
+    video: "roCP6wCXPqo",
+    weight: "20–25 lb dumbbell",
+    rationale: "Focus on squeezing your back, not yanking with your arms.",
+    type: "pull"
+  },
+  "Lat Pulldowns": {
+    video: "CAwf7n6Luuc",
+    weight: "Start light (machine)",
+    rationale: "Focus on lat engagement — drop the ego weight.",
+    type: "pull"
+  },
+  "Barbell Squats": {
+    video: "ultWZbUMPL8",
+    weight: "45 lb (empty barbell)",
+    rationale: "Master depth and bracing with the empty bar first."
+  },
+  "Barbell Deadlifts": {
+    video: "op9kVnSo6Qc",
+    weight: "45 lb (empty barbell)",
+    rationale: "Drill the hip hinge with minimal load."
+  },
+  "Walking Lunges": {
+    video: "D7KaRcUTQeE",
+    weight: "10 lb dumbbells each hand",
+    rationale: "Light load builds balance and knee stability."
+  },
+  "Romanian Deadlifts": {
+    video: "jEy_czb3RKA",
+    weight: "45 lb (empty barbell)",
+    rationale: "Empty bar teaches the stretch reflex."
+  },
+  "Bulgarian Split Squats": {
+    video: "2C-uNgKwPLE",
+    weight: "Bodyweight",
+    rationale: "Master balance before adding any weight."
+  },
+  "Single-leg Romanian DL": {
+    video: "59pWKxWXtCo",
+    weight: "10 lb dumbbell",
+    rationale: "Very light — focus on hamstring/glute control."
+  },
+  "Dead Bugs": {
+    video: "I5xbsA71v1A",
+    weight: "Bodyweight",
+    rationale: "Great core stability drill — no equipment needed."
+  },
+  "Bring Sally Up Squats": {
+    video: "41N6bKO-NVI",
+    weight: "Bodyweight",
+    rationale: "Follow the song \"Flower\" by Moby — squat on cue!",
+    isSally: true,
+    songVideo: "2V_Xlci20eM"
+  }
+};
+
+/* ── Workout Plans ── */
+const PLANS = {
+  "5x5": {
+    sets: 5, reps: 5,
+    upper: ["Bench Press", "Dumbbell Rows", "Shoulder Press", "Lat Pulldowns", "Chest Flies"],
+    lower: ["Barbell Squats", "Barbell Deadlifts", "Walking Lunges", "Romanian Deadlifts", "Bulgarian Split Squats"],
+    mixed: ["Barbell Squats", "Bench Press", "Barbell Deadlifts", "Dumbbell Rows", "Shoulder Press"]
+  },
+  "3x8": {
+    sets: 3, reps: 8,
+    upper: ["Bench Press", "Dumbbell Rows", "Shoulder Press", "Lat Pulldowns", "Chest Flies", "Dead Bugs"],
+    lower: ["Barbell Squats", "Romanian Deadlifts", "Walking Lunges", "Bulgarian Split Squats", "Single-leg Romanian DL", "Bring Sally Up Squats"],
+    mixed: ["Barbell Squats", "Bench Press", "Walking Lunges", "Dumbbell Rows", "Romanian Deadlifts", "Shoulder Press"]
+  }
+};
+
+/* ── State ── */
+let chosen = { config: null, type: null };
+let totalCheckboxes = 0;
+
+function pick(key, btn) {
+  chosen[key] = btn.dataset.value;
+  btn.parentElement.querySelectorAll('button').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById('start-btn').classList.toggle('ready', chosen.config && chosen.type);
+}
+
+function startWorkout() {
+  if (!chosen.config || !chosen.type) return;
+  const plan = PLANS[chosen.config];
+  const exercises = plan[chosen.type];
+  const { sets, reps } = plan;
+
+  document.getElementById('workout-title').textContent =
+    `${chosen.config.toUpperCase()} — ${chosen.type.charAt(0).toUpperCase() + chosen.type.slice(1)}`;
+  document.getElementById('workout-subtitle').textContent =
+    `${exercises.length} exercises · ${sets} sets × ${reps} reps`;
+
+  const list = document.getElementById('exercise-list');
+  list.innerHTML = '';
+  totalCheckboxes = 0;
+
+  exercises.forEach((name, i) => {
+    list.appendChild(createCard(name, sets, reps, i + 1, exercises.length));
+  });
+
+  updateProgress();
+
+  document.getElementById('selector').style.display = 'none';
+  document.getElementById('workout').style.display = 'block';
+  window.scrollTo(0, 0);
+}
+
+function createCard(name, sets, reps, num, total) {
+  const ex = EXERCISES[name];
+  const card = document.createElement('div');
+  card.className = 'exercise-card';
+
+  let headerHTML = `<span class="exercise-name">${num}. ${name}</span>`;
+  if (ex.type === 'push') headerHTML += ' <span class="badge badge-push">Push</span>';
+  if (ex.type === 'pull') headerHTML += ' <span class="badge badge-pull">Pull</span>';
+
+  let videoHTML = `
+    <div class="video-wrap">
+      <iframe src="https://www.youtube-nocookie.com/embed/${ex.video}?playsinline=1"
+        loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen></iframe>
+    </div>`;
+
+  let bodyHTML = '';
+
+  if (ex.isSally) {
+    bodyHTML += `
+      <div class="sally-instructions">
+        <strong>How it works:</strong> Play the song below. Every time you hear
+        <em>"bring Sally up"</em>, stand up. Every time you hear <em>"bring Sally down"</em>,
+        squat down and hold. Survive the whole song!
+      </div>
+      <div class="video-wrap">
+        <iframe src="https://www.youtube-nocookie.com/embed/${ex.songVideo}?playsinline=1"
+          loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+      </div>`;
+  }
+
+  bodyHTML += `<div class="weight-tip"><strong>${ex.weight}</strong> — ${ex.rationale}</div>`;
+
+  let checksHTML = '<div class="sets-row">';
+  if (ex.isSally) {
+    totalCheckboxes += 1;
+    checksHTML += `
+      <div class="set-check">
+        <span>Done</span>
+        <input type="checkbox" onchange="updateProgress()" aria-label="Completed">
+      </div>`;
+  } else {
+    for (let s = 1; s <= sets; s++) {
+      totalCheckboxes += 1;
+      checksHTML += `
+        <div class="set-check">
+          <span>Set ${s}</span>
+          <input type="checkbox" onchange="updateProgress()" aria-label="Set ${s} of ${name}">
+        </div>`;
+    }
+  }
+  checksHTML += '</div>';
+
+  card.innerHTML = `
+    <div class="exercise-header">${headerHTML}</div>
+    ${videoHTML}
+    ${bodyHTML}
+    ${checksHTML}`;
+
+  return card;
+}
+
+function updateProgress() {
+  const checked = document.querySelectorAll('#exercise-list input[type="checkbox"]:checked').length;
+  const prog = document.getElementById('progress');
+  if (totalCheckboxes === 0) { prog.textContent = ''; return; }
+  const pct = Math.round((checked / totalCheckboxes) * 100);
+  prog.innerHTML = `<span class="done">${checked}</span> / ${totalCheckboxes} sets completed (${pct}%)`;
+}
+
+function goBack() {
+  document.getElementById('workout').style.display = 'none';
+  document.getElementById('selector').style.display = 'block';
+  document.getElementById('exercise-list').innerHTML = '';
+  window.scrollTo(0, 0);
+}
+</script>
+</body>
+</html>
