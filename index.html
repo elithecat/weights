@@ -69,6 +69,7 @@
   .btn-row {
     display: flex;
     gap: 10px;
+    flex-wrap: wrap;
   }
 
   .btn-row button {
@@ -179,11 +180,19 @@
   .video-wrap {
     position: relative;
     width: 100%;
-    padding-bottom: 56.25%;
+    padding-bottom: 177.78%;
+    max-width: 300px;
+    margin-left: auto;
+    margin-right: auto;
     border-radius: 8px;
     overflow: hidden;
     margin-bottom: 12px;
     background: #000;
+  }
+
+  .video-wrap.landscape {
+    padding-bottom: 56.25%;
+    max-width: 100%;
   }
 
   .video-wrap iframe {
@@ -289,15 +298,17 @@
     </div>
 
     <div class="option-group">
-      <label>Focus</label>
+      <label>Workout</label>
       <div class="btn-row" id="type-btns">
+        <button data-value="mixed-a" onclick="pick('type', this)">Mixed A</button>
+        <button data-value="mixed-b" onclick="pick('type', this)">Mixed B</button>
         <button data-value="upper" onclick="pick('type', this)">Upper</button>
         <button data-value="lower" onclick="pick('type', this)">Lower</button>
-        <button data-value="mixed" onclick="pick('type', this)">Mixed</button>
+        <button data-value="all" onclick="pick('type', this)">All</button>
       </div>
     </div>
 
-    <button class="start-btn" id="start-btn" onclick="startWorkout()">Start Workout</button>
+<button class="start-btn" id="start-btn" onclick="startWorkout()">Start Workout</button>
   </div>
 
   <!-- ════ Workout Screen ════ -->
@@ -319,72 +330,78 @@
 /* ── Exercise Data ── */
 const EXERCISES = {
   "Bench Press": {
-    video: "rT7DgCr-3pg",
+    video: "U2wKgoUAEMo",
     weight: "45 lb (empty barbell)",
     rationale: "Learn the movement pattern with just the bar.",
     type: "push"
   },
   "Shoulder Press": {
-    video: "qEwKCR5JCog",
+    video: "WrQqtezYNn8",
     weight: "10 lb dumbbells",
     rationale: "Light weight protects the rotator cuff while you learn.",
     type: "push"
   },
   "Chest Flies": {
-    video: "eozdVDA78K0",
+    video: "_B62sCCpEgQ",
     weight: "10 lb dumbbells",
     rationale: "Isolation move — light weight prevents shoulder strain.",
     type: "push"
   },
-  "Dumbbell Rows": {
-    video: "roCP6wCXPqo",
+  "Single-Arm Dumbbell Row": {
+    video: "SIuz8kZNn48",
     weight: "20–25 lb dumbbell",
-    rationale: "Focus on squeezing your back, not yanking with your arms.",
+    rationale: "Focus on squeezing your back, not yanking with your arm.",
     type: "pull"
   },
   "Lat Pulldowns": {
-    video: "CAwf7n6Luuc",
+    video: "cnhqUfduFoE",
     weight: "Start light (machine)",
     rationale: "Focus on lat engagement — drop the ego weight.",
     type: "pull"
   },
   "Barbell Squats": {
-    video: "ultWZbUMPL8",
+    video: "MM9ObaAPcv4",
     weight: "45 lb (empty barbell)",
     rationale: "Master depth and bracing with the empty bar first."
   },
   "Barbell Deadlifts": {
-    video: "op9kVnSo6Qc",
+    video: "O1lJXVUh2Pk",
     weight: "45 lb (empty barbell)",
     rationale: "Drill the hip hinge with minimal load."
   },
   "Walking Lunges": {
-    video: "D7KaRcUTQeE",
+    video: "Dfflgohz1BA",
     weight: "10 lb dumbbells each hand",
     rationale: "Light load builds balance and knee stability."
   },
   "Romanian Deadlifts": {
-    video: "jEy_czb3RKA",
+    video: "arIOtHqEAe4",
     weight: "45 lb (empty barbell)",
     rationale: "Empty bar teaches the stretch reflex."
   },
   "Bulgarian Split Squats": {
-    video: "2C-uNgKwPLE",
+    video: "uBSoEWZu07k",
     weight: "Bodyweight",
     rationale: "Master balance before adding any weight."
   },
   "Single-leg Romanian DL": {
-    video: "59pWKxWXtCo",
+    video: "vGuyEm2KWSI",
     weight: "10 lb dumbbell",
     rationale: "Very light — focus on hamstring/glute control."
   },
+  "Wall Sits": {
+    video: "ESDrWfcDQyc",
+    weight: "10 lb kettlebell, 45 sec hold",
+    rationale: "Hold the kettlebell at your chest — build isometric leg strength.",
+    isWallSit: true
+  },
   "Dead Bugs": {
-    video: "I5xbsA71v1A",
+    video: "-8xqJ2xXs2A",
     weight: "Bodyweight",
     rationale: "Great core stability drill — no equipment needed."
   },
   "Bring Sally Up Squats": {
-    video: "41N6bKO-NVI",
+    video: "MM9ObaAPcv4",
     weight: "Bodyweight",
     rationale: "Follow the song \"Flower\" by Moby — squat on cue!",
     isSally: true,
@@ -396,15 +413,17 @@ const EXERCISES = {
 const PLANS = {
   "5x5": {
     sets: 5, reps: 5,
-    upper: ["Bench Press", "Dumbbell Rows", "Shoulder Press", "Lat Pulldowns", "Chest Flies"],
-    lower: ["Barbell Squats", "Barbell Deadlifts", "Walking Lunges", "Romanian Deadlifts", "Bulgarian Split Squats"],
-    mixed: ["Barbell Squats", "Bench Press", "Barbell Deadlifts", "Dumbbell Rows", "Shoulder Press"]
+    upper: ["Bench Press", "Single-Arm Dumbbell Row", "Shoulder Press", "Lat Pulldowns", "Chest Flies"],
+    lower: ["Barbell Squats", "Barbell Deadlifts", "Walking Lunges", "Romanian Deadlifts", "Bulgarian Split Squats", "Wall Sits"],
+    "mixed-a": ["Barbell Squats", "Bench Press", "Barbell Deadlifts", "Single-Arm Dumbbell Row", "Shoulder Press", "Wall Sits"],
+    "mixed-b": ["Romanian Deadlifts", "Chest Flies", "Walking Lunges", "Lat Pulldowns", "Bulgarian Split Squats", "Dead Bugs"]
   },
   "3x8": {
     sets: 3, reps: 8,
-    upper: ["Bench Press", "Dumbbell Rows", "Shoulder Press", "Lat Pulldowns", "Chest Flies", "Dead Bugs"],
-    lower: ["Barbell Squats", "Romanian Deadlifts", "Walking Lunges", "Bulgarian Split Squats", "Single-leg Romanian DL", "Bring Sally Up Squats"],
-    mixed: ["Barbell Squats", "Bench Press", "Walking Lunges", "Dumbbell Rows", "Romanian Deadlifts", "Shoulder Press"]
+    upper: ["Bench Press", "Single-Arm Dumbbell Row", "Shoulder Press", "Lat Pulldowns", "Chest Flies", "Dead Bugs"],
+    lower: ["Barbell Squats", "Romanian Deadlifts", "Walking Lunges", "Bulgarian Split Squats", "Single-leg Romanian DL", "Wall Sits", "Bring Sally Up Squats"],
+    "mixed-a": ["Barbell Squats", "Bench Press", "Walking Lunges", "Single-Arm Dumbbell Row", "Romanian Deadlifts", "Shoulder Press"],
+    "mixed-b": ["Barbell Deadlifts", "Chest Flies", "Bulgarian Split Squats", "Lat Pulldowns", "Single-leg Romanian DL", "Wall Sits"]
   }
 };
 
@@ -419,14 +438,23 @@ function pick(key, btn) {
   document.getElementById('start-btn').classList.toggle('ready', chosen.config && chosen.type);
 }
 
+
 function startWorkout() {
   if (!chosen.config || !chosen.type) return;
   const plan = PLANS[chosen.config];
-  const exercises = plan[chosen.type];
   const { sets, reps } = plan;
+  let exercises, label;
+
+  if (chosen.type === 'all') {
+    exercises = Object.keys(EXERCISES);
+    label = 'All Exercises';
+  } else {
+    exercises = plan[chosen.type];
+    label = chosen.type.charAt(0).toUpperCase() + chosen.type.slice(1);
+  }
 
   document.getElementById('workout-title').textContent =
-    `${chosen.config.toUpperCase()} — ${chosen.type.charAt(0).toUpperCase() + chosen.type.slice(1)}`;
+    `${chosen.config.toUpperCase()} — ${label}`;
   document.getElementById('workout-subtitle').textContent =
     `${exercises.length} exercises · ${sets} sets × ${reps} reps`;
 
@@ -454,9 +482,10 @@ function createCard(name, sets, reps, num, total) {
   if (ex.type === 'push') headerHTML += ' <span class="badge badge-push">Push</span>';
   if (ex.type === 'pull') headerHTML += ' <span class="badge badge-pull">Pull</span>';
 
+  const videoId = ex.video;
   let videoHTML = `
     <div class="video-wrap">
-      <iframe src="https://www.youtube-nocookie.com/embed/${ex.video}?playsinline=1"
+      <iframe src="https://www.youtube-nocookie.com/embed/${videoId}?playsinline=1&loop=1"
         loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
         allowfullscreen></iframe>
     </div>`;
@@ -470,7 +499,7 @@ function createCard(name, sets, reps, num, total) {
         <em>"bring Sally up"</em>, stand up. Every time you hear <em>"bring Sally down"</em>,
         squat down and hold. Survive the whole song!
       </div>
-      <div class="video-wrap">
+      <div class="video-wrap landscape">
         <iframe src="https://www.youtube-nocookie.com/embed/${ex.songVideo}?playsinline=1"
           loading="lazy" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowfullscreen></iframe>
@@ -480,7 +509,7 @@ function createCard(name, sets, reps, num, total) {
   bodyHTML += `<div class="weight-tip"><strong>${ex.weight}</strong> — ${ex.rationale}</div>`;
 
   let checksHTML = '<div class="sets-row">';
-  if (ex.isSally) {
+  if (ex.isSally || ex.isWallSit) {
     totalCheckboxes += 1;
     checksHTML += `
       <div class="set-check">
