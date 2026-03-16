@@ -46,7 +46,40 @@
     text-align: center;
     color: var(--text-dim);
     font-size: 0.9rem;
+    margin-bottom: 20px;
+  }
+
+  .intro-box {
+    background: var(--surface);
+    border-radius: var(--radius);
+    padding: 16px;
     margin-bottom: 24px;
+    line-height: 1.6;
+    font-size: 0.9rem;
+    color: var(--text-dim);
+    border-left: 3px solid var(--accent);
+  }
+
+  .intro-box h2 {
+    font-size: 1rem;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .intro-box ol,
+  .intro-box ul {
+    padding-left: 20px;
+    margin: 8px 0;
+  }
+
+  .intro-box li {
+    margin-bottom: 4px;
+  }
+
+  .intro-box .tip {
+    margin-top: 10px;
+    font-size: 0.82rem;
+    color: var(--text-dim);
   }
 
   /* ── Selector Screen ── */
@@ -287,7 +320,22 @@
   <!-- ════ Selector Screen ════ -->
   <div id="selector">
     <h1>Workout Buddy</h1>
-    <p class="subtitle">Pick your config and body focus, then hit Start.</p>
+    <p class="subtitle">Your simple strength training companion</p>
+
+    <div class="intro-box">
+      <h2>How It Works</h2>
+      <p>New to weightlifting? Here are two key terms you'll see throughout:</p>
+      <ul>
+        <li><strong>Rep</strong> (repetition) &mdash; one complete movement of an exercise. For example, lowering and pressing a barbell back up once = 1 rep.</li>
+        <li><strong>Set</strong> &mdash; a group of reps done back-to-back before you rest. So "3 sets of 8 reps" means you do 8 reps, rest for a minute or two, do 8 more, rest, then do 8 more.</li>
+      </ul>
+      <ol>
+        <li>Choose a <strong>config</strong> &mdash; 3&times;8 (3 sets of 8 reps, great for beginners) or 5&times;5 (5 sets of 5 reps, heavier strength focus).</li>
+        <li>Pick a <strong>workout</strong> &mdash; Upper, Lower, Mixed A/B for a balanced split, or All for every exercise.</li>
+        <li>Hit <strong>Start</strong> and follow along! Each exercise has a demo video, suggested starting weight, and checkboxes to track your sets.</li>
+      </ol>
+      <p class="tip">Tip: Start with lighter weights to nail your form. Check off each set as you go &mdash; the progress bar at the top keeps you on track.</p>
+    </div>
 
     <div class="option-group">
       <label>Config</label>
